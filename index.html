@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zero Cash Ai — AI Agent on Base Chain</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{--base:#0052ff;--base2:#0040cc;--green:#00ff88;--green2:#00cc6a;--white:#f0f4ff;--muted:#6070a0;--bg:#03040f;--bg2:#060818;--card:#080c1e;--border:rgba(0,82,255,0.2);--gold:#ffd700;--red:#ff4466}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:'Syne',sans-serif;overflow-x:hidden}
+#canvas3d{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 50px;display:flex;align-items:center;justify-content:space-between;background:rgba(3,4,15,0.75);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:12px;font-family:'Space Mono',monospace;font-size:1rem;letter-spacing:2px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--base),var(--green));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.82rem;letter-spacing:1.5px;text-transform:uppercase;transition:color .3s}
+.nav-links a:hover{color:var(--green)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.base-badge{display:flex;align-items:center;gap:6px;border:1px solid var(--border);padding:6px 14px;font-family:'Space Mono',monospace;font-size:.7rem;color:var(--base);background:rgba(0,82,255,.08);letter-spacing:1px}
+.base-dot{width:6px;height:6px;background:var(--base);border-radius:50%;animation:pulse 2s infinite}
+.btn-x{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--white);padding:8px 16px;font-family:'Space Mono',monospace;font-size:.75rem;letter-spacing:1px;cursor:pointer;text-decoration:none;transition:all .3s}
+.btn-x:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)}
+.btn-join{background:var(--base);color:white;border:none;padding:9px 22px;font-family:'Space Mono',monospace;font-size:.78rem;font-weight:700;letter-spacing:1px;cursor:pointer;text-decoration:none;transition:all .3s;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%)}
+.btn-join:hover{background:var(--base2);transform:translateY(-1px)}
+.hero{min-height:100vh;display:flex;align-items:center;padding:120px 50px 80px;position:relative;z-index:1}
+.hero-inner{max-width:680px}
+.chain-tag{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--border);padding:8px 18px;margin-bottom:36px;background:rgba(0,82,255,.06);font-family:'Space Mono',monospace;font-size:.72rem;color:var(--base);letter-spacing:2px}
+.hero-eyebrow{font-family:'Space Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:4px;text-transform:uppercase;margin-bottom:16px}
+.hero h1{font-size:clamp(2.8rem,7vw,6rem);font-weight:800;line-height:.95;letter-spacing:-3px;margin-bottom:28px}
+.hero h1 .w1{display:block;color:var(--white)}
+.hero h1 .w2{display:block;background:linear-gradient(90deg,var(--base),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero h1 .w3{display:block;color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.2)}
+.hero-desc{font-size:1.05rem;color:var(--muted);line-height:1.75;max-width:520px;margin-bottom:44px;font-weight:400}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:60px}
+.btn-primary{background:linear-gradient(135deg,var(--base),#0066ff);color:white;border:none;padding:15px 36px;font-family:'Space Mono',monospace;font-size:.85rem;font-weight:700;letter-spacing:1px;cursor:pointer;text-decoration:none;transition:all .3s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 0 40px rgba(0,82,255,.3)}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 0 60px rgba(0,82,255,.5)}
+.btn-ghost{background:transparent;color:var(--white);border:1px solid rgba(255,255,255,.15);padding:15px 36px;font-family:'Space Mono',monospace;font-size:.85rem;letter-spacing:1px;cursor:pointer;text-decoration:none;transition:all .3s;display:inline-flex;align-items:center;gap:8px}
+.btn-ghost:hover{border-color:var(--green);color:var(--green);transform:translateY(-3px)}
+.btn-twitter{background:transparent;color:var(--white);border:1px solid rgba(255,255,255,.15);padding:15px 36px;font-family:'Space Mono',monospace;font-size:.85rem;letter-spacing:1px;cursor:pointer;text-decoration:none;transition:all .3s;display:inline-flex;align-items:center;gap:8px}
+.btn-twitter:hover{border-color:#1d9bf0;color:#1d9bf0;transform:translateY(-3px)}
+.hero-stats{display:flex;gap:40px;flex-wrap:wrap}
+.hstat{border-left:2px solid var(--border);padding-left:20px}
+.hstat-num{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;display:block}
+.hstat-num.blue{color:var(--base)}.hstat-num.green{color:var(--green)}.hstat-num.white{color:var(--white)}
+.hstat-label{font-size:.75rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.ticker-section{position:relative;z-index:1;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(6,8,24,.92);overflow:hidden;padding:14px 0}
+.ticker{display:flex;gap:64px;animation:scroll 30s linear infinite;white-space:nowrap;width:max-content}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tick{display:flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:.78rem}
+.tick-sym{color:var(--muted);letter-spacing:1px}.tick-price{color:var(--white);font-weight:700}
+.up{color:var(--green)}.dn{color:var(--red)}
+.stats-bar{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);max-width:1200px;margin:0 auto}
+.sbar{background:var(--card);padding:44px 32px;text-align:center;transition:background .3s}
+.sbar:hover{background:#0a0e22}
+.sbar-val{font-family:'Space Mono',monospace;font-size:2.2rem;font-weight:700;display:block;margin-bottom:8px}
+.sbar-val.blue{color:var(--base)}.sbar-val.green{color:var(--green)}.sbar-val.white{color:var(--white)}
+.sbar-label{font-size:.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.base-section{position:relative;z-index:1;padding:100px 50px;background:rgba(0,82,255,.04);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.base-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.sec-eyebrow{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--base);letter-spacing:4px;text-transform:uppercase;margin-bottom:14px}
+.sec-title{font-size:clamp(2rem,4vw,3.2rem);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:24px}
+.sec-title .accent{color:var(--base)}.sec-title .accent-g{color:var(--green)}
+.base-desc{color:var(--muted);font-size:.95rem;line-height:1.8;margin-bottom:36px;font-weight:400}
+.base-feats{display:flex;flex-direction:column;gap:16px}
+.bfeat{display:flex;align-items:flex-start;gap:14px}
+.bfeat-icon{width:36px;height:36px;background:rgba(0,82,255,.15);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;border-radius:6px}
+.bfeat-text strong{display:block;font-size:.9rem;margin-bottom:4px}
+.bfeat-text span{color:var(--muted);font-size:.82rem;font-weight:400}
+.chain-card{background:var(--card);border:1px solid var(--border);padding:32px;position:relative;overflow:hidden}
+.chain-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--base),var(--green),transparent)}
+.chain-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.chain-name{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--base);letter-spacing:2px}
+.chain-live{display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:.7rem;color:var(--green)}
+.chain-live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+.chain-metrics{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.cmetric{background:rgba(0,82,255,.06);border:1px solid rgba(0,82,255,.1);padding:16px}
+.cmetric-val{font-family:'Space Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--white);margin-bottom:4px}
+.cmetric-label{font-size:.7rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.tx-feed{border-top:1px solid var(--border);padding-top:16px}
+.tx-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-family:'Space Mono',monospace;font-size:.72rem}
+.tx-hash{color:var(--base)}.tx-type{color:var(--muted)}.tx-val{color:var(--green)}
+.section{position:relative;z-index:1;padding:100px 50px;max-width:1200px;margin:0 auto}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+.feat-card{background:var(--card);padding:40px 32px;position:relative;overflow:hidden;transition:background .3s;cursor:default}
+.feat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:0;background:linear-gradient(0deg,rgba(0,82,255,.08),transparent);transition:height .4s}
+.feat-card:hover{background:#0a0e22}.feat-card:hover::after{height:100%}
+.feat-num{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--base);letter-spacing:2px;margin-bottom:20px;display:block}
+.feat-ico{font-size:2.2rem;margin-bottom:18px;display:block}
+.feat-title{font-size:1.05rem;font-weight:700;margin-bottom:12px}
+.feat-body{color:var(--muted);font-size:.875rem;line-height:1.75;font-weight:400}
+.feat-tag{display:inline-block;margin-top:16px;background:rgba(0,82,255,.1);border:1px solid rgba(0,82,255,.2);padding:4px 10px;font-family:'Space Mono',monospace;font-size:.65rem;color:var(--base);letter-spacing:1px}
+.terminal-wrap{position:relative;z-index:1;padding:0 50px 100px;max-width:1000px;margin:0 auto}
+.terminal{background:#060a18;border:1px solid rgba(0,82,255,.25);box-shadow:0 0 80px rgba(0,82,255,.1)}
+.term-bar{background:#090d1f;padding:14px 20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(0,82,255,.15)}
+.td{width:10px;height:10px;border-radius:50%}.td.r{background:#ff5f57}.td.y{background:#febc2e}.td.g{background:#28c840}
+.term-title{color:var(--muted);font-family:'Space Mono',monospace;font-size:.72rem;margin-left:10px}
+.term-body{padding:28px 32px;font-family:'Space Mono',monospace;font-size:.8rem;line-height:2.1}
+.tl{display:flex;gap:10px}.tp{color:var(--base)}.tc{color:var(--white)}.to{color:var(--muted);padding-left:18px}
+.tg{color:var(--green)}.tbl{color:var(--base)}.tgd{color:var(--gold)}
+.cur{display:inline-block;width:7px;height:1em;background:var(--base);animation:blink 1s infinite;vertical-align:middle;margin-left:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.social-section{position:relative;z-index:1;padding:80px 50px;max-width:1200px;margin:0 auto}
+.social-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:800px}
+.social-card{background:var(--card);border:1px solid var(--border);padding:36px 32px;display:flex;align-items:center;gap:24px;text-decoration:none;transition:all .3s;position:relative;overflow:hidden}
+.social-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .3s}
+.social-card.telegram::before{background:linear-gradient(90deg,transparent,#2AABEE,transparent)}
+.social-card.twitter::before{background:linear-gradient(90deg,transparent,#1d9bf0,transparent)}
+.social-card.github::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.social-card.virtuals::before{background:linear-gradient(90deg,transparent,var(--base),transparent)}
+.social-card:hover{transform:translateY(-4px)}.social-card:hover::before{opacity:1}
+.social-card.telegram:hover{border-color:rgba(42,171,238,.3)}
+.social-card.twitter:hover{border-color:rgba(29,155,240,.3)}
+.social-card.github:hover{border-color:rgba(0,255,136,.3)}
+.social-card.virtuals:hover{border-color:rgba(0,82,255,.4)}
+.soc-icon{font-size:2.2rem;flex-shrink:0}
+.soc-name{font-size:1rem;font-weight:700;margin-bottom:4px}
+.soc-handle{color:var(--muted);font-family:'Space Mono',monospace;font-size:.8rem}
+.cta-section{position:relative;z-index:1;padding:100px 50px;text-align:center;border-top:1px solid var(--border)}
+.cta-inner{max-width:680px;margin:0 auto;background:var(--card);border:1px solid var(--border);padding:70px 50px;position:relative;overflow:hidden}
+.cta-inner::before{content:'';position:absolute;top:-1px;left:15%;right:15%;height:2px;background:linear-gradient(90deg,transparent,var(--base),var(--green),transparent)}
+.cta-inner h2{font-size:2.4rem;font-weight:800;letter-spacing:-1.5px;margin-bottom:16px}
+.cta-inner p{color:var(--muted);margin-bottom:36px;line-height:1.7;font-weight:400}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40px 50px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;background:rgba(6,8,24,.9)}
+.foot-logo{font-family:'Space Mono',monospace;font-size:.9rem;color:var(--base);letter-spacing:2px}
+.foot-chain{color:var(--muted);font-size:.78rem}
+.foot-links{display:flex;gap:24px}
+.foot-links a{color:var(--muted);text-decoration:none;font-size:.78rem;transition:color .3s}
+.foot-links a:hover{color:var(--base)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}}
+.fade-up{opacity:0;transform:translateY(32px);transition:opacity .8s ease,transform .8s ease}
+.fade-up.show{opacity:1;transform:translateY(0)}
+.fade-up:nth-child(2){transition-delay:.1s}.fade-up:nth-child(3){transition-delay:.2s}
+.fade-up:nth-child(4){transition-delay:.3s}.fade-up:nth-child(5){transition-delay:.4s}.fade-up:nth-child(6){transition-delay:.5s}
+@media(max-width:900px){
+  nav{padding:16px 24px}.nav-links{display:none}
+  .hero{padding:100px 24px 60px}.hero h1{letter-spacing:-2px}
+  .base-inner{grid-template-columns:1fr}
+  .features-grid{grid-template-columns:1fr}
+  .social-grid{grid-template-columns:1fr}
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+  .section,.social-section{padding:70px 24px}.terminal-wrap{padding:0 24px 70px}
+  .cta-inner{padding:50px 28px}.base-section{padding:70px 24px}
+  footer{padding:32px 24px;flex-direction:column;text-align:center}
+}
+</style>
+</head>
+<body>
+<canvas id="canvas3d"></canvas>
+
+<nav>
+  <div class="nav-logo"><div class="logo-icon">⚡</div>ZERO<span style="color:#0052ff">CASH</span>.AI</div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#base">Base Chain</a></li>
+    <li><a href="#social">Socials</a></li>
+    <li><a href="#terminal">Live Feed</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="base-badge"><span class="base-dot"></span>BASE CHAIN</div>
+    <a href="https://x.com/Zero_Cash_Ai" class="btn-x" target="_blank">𝕏 Twitter</a>
+    <a href="https://t.me/ZeroCashAi" class="btn-join" target="_blank">JOIN NOW</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="chain-tag">🔵 DEPLOYED ON BASE CHAIN × VIRTUALS PROTOCOL</div>
+    <div class="hero-eyebrow">// AUTONOMOUS AI AGENT</div>
+    <h1><span class="w1">ZERO</span><span class="w2">CASH AI</span><span class="w3">AGENT</span></h1>
+    <p class="hero-desc">An autonomous crypto intelligence agent built on Base Chain. Powered by Virtuals Protocol GAME SDK & Google Gemini — delivering AI market analysis, price alerts, and on-chain insights 24/7 worldwide.</p>
+    <div class="hero-actions">
+      <a href="https://t.me/ZeroCashAi" class="btn-primary" target="_blank">📱 Join Telegram</a>
+      <a href="https://x.com/Zero_Cash_Ai" class="btn-twitter" target="_blank">𝕏 Follow on X</a>
+      <a href="https://github.com/Foisal777/zero-cash-ai" class="btn-ghost" target="_blank">⚡ GitHub</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><span class="hstat-num blue" id="h-mcap">$2.4T</span><span class="hstat-label">Market Cap</span></div>
+      <div class="hstat"><span class="hstat-num green">24/7</span><span class="hstat-label">Monitoring</span></div>
+      <div class="hstat"><span class="hstat-num white">1H</span><span class="hstat-label">Updates</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker-section">
+  <div class="ticker" id="ticker">
+    <span class="tick"><span class="tick-sym">BTC</span><span class="tick-price">$70,715</span><span class="up">+3.61%</span></span>
+    <span class="tick"><span class="tick-sym">ETH</span><span class="tick-price">$2,056</span><span class="up">+2.57%</span></span>
+    <span class="tick"><span class="tick-sym">SOL</span><span class="tick-price">$86.89</span><span class="up">+3.32%</span></span>
+    <span class="tick"><span class="tick-sym">SUI</span><span class="tick-price">$0.978</span><span class="up">+7.24%</span></span>
+    <span class="tick"><span class="tick-sym">VIRTUAL</span><span class="tick-price">$0.715</span><span class="up">+7.67%</span></span>
+    <span class="tick"><span class="tick-sym">BASE</span><span class="tick-price">MAINNET</span><span class="up">LIVE</span></span>
+    <span class="tick"><span class="tick-sym">BTC</span><span class="tick-price">$70,715</span><span class="up">+3.61%</span></span>
+    <span class="tick"><span class="tick-sym">ETH</span><span class="tick-price">$2,056</span><span class="up">+2.57%</span></span>
+    <span class="tick"><span class="tick-sym">SOL</span><span class="tick-price">$86.89</span><span class="up">+3.32%</span></span>
+    <span class="tick"><span class="tick-sym">SUI</span><span class="tick-price">$0.978</span><span class="up">+7.24%</span></span>
+    <span class="tick"><span class="tick-sym">VIRTUAL</span><span class="tick-price">$0.715</span><span class="up">+7.67%</span></span>
+    <span class="tick"><span class="tick-sym">BASE</span><span class="tick-price">MAINNET</span><span class="up">LIVE</span></span>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="sbar fade-up"><span class="sbar-val blue" id="s-mcap">$2.4T</span><span class="sbar-label">Global Market Cap</span></div>
+  <div class="sbar fade-up"><span class="sbar-val green">24/7</span><span class="sbar-label">Active Monitoring</span></div>
+  <div class="sbar fade-up"><span class="sbar-val white">≥5%</span><span class="sbar-label">Alert Threshold</span></div>
+  <div class="sbar fade-up"><span class="sbar-val blue">FREE</span><span class="sbar-label">Always Free</span></div>
+</div>
+
+<div class="base-section" id="base">
+  <div class="base-inner">
+    <div class="base-content fade-up">
+      <div class="sec-eyebrow">// BUILT ON BASE</div>
+      <h2 class="sec-title">Coinbase's <span class="accent">Base Chain</span> — The Home of Onchain AI.</h2>
+      <p class="base-desc">Zero Cash Ai runs on Base, Coinbase's L2 Ethereum network. Near-instant transactions, ultra-low fees, and full Ethereum security — the ideal foundation for a 24/7 autonomous AI agent.</p>
+      <div class="base-feats">
+        <div class="bfeat"><div class="bfeat-icon">🔵</div><div class="bfeat-text"><strong>Base L2 by Coinbase</strong><span>Ethereum L2 — secured, fast, and ultra low-cost</span></div></div>
+        <div class="bfeat"><div class="bfeat-icon">🤖</div><div class="bfeat-text"><strong>Virtuals Protocol GAME SDK</strong><span>On-chain intelligence layer for autonomous AI agents</span></div></div>
+        <div class="bfeat"><div class="bfeat-icon">⚡</div><div class="bfeat-text"><strong>~2s Block Time</strong><span>Near-instant finality with full Ethereum security</span></div></div>
+        <div class="bfeat"><div class="bfeat-icon">🔗</div><div class="bfeat-text"><strong>Fully On-Chain</strong><span>Agent state and actions verifiable on Base mainnet</span></div></div>
+      </div>
+    </div>
+    <div class="fade-up">
+      <div class="chain-card">
+        <div class="chain-header">
+          <span class="chain-name">🔵 BASE MAINNET</span>
+          <span class="chain-live"><span class="chain-live-dot"></span>LIVE</span>
+        </div>
+        <div class="chain-metrics">
+          <div class="cmetric"><div class="cmetric-val">~2s</div><div class="cmetric-label">Block Time</div></div>
+          <div class="cmetric"><div class="cmetric-val">$0.01</div><div class="cmetric-label">Gas Fee</div></div>
+          <div class="cmetric"><div class="cmetric-val">8453</div><div class="cmetric-label">Chain ID</div></div>
+          <div class="cmetric"><div class="cmetric-val">ETH</div><div class="cmetric-label">Native Token</div></div>
+        </div>
+        <div class="tx-feed">
+          <div class="tx-item"><span class="tx-hash">0xzca...001</span><span class="tx-type">AGENT_INIT</span><span class="tx-val">✅</span></div>
+          <div class="tx-item"><span class="tx-hash">0xzca...002</span><span class="tx-type">MARKET_UPDATE</span><span class="tx-val">✅</span></div>
+          <div class="tx-item"><span class="tx-hash">0xzca...003</span><span class="tx-type">AI_ANALYSIS</span><span class="tx-val">✅</span></div>
+          <div class="tx-item"><span class="tx-hash">0xzca...004</span><span class="tx-type">POST_TELEGRAM</span><span class="tx-val">✅</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="section" id="features">
+  <div class="sec-eyebrow">// CAPABILITIES</div>
+  <h2 class="sec-title" style="margin-bottom:60px">Built different.<br><span class="accent-g">Six core features.</span></h2>
+  <div class="features-grid">
+    <div class="feat-card fade-up"><span class="feat-num">// 01</span><span class="feat-ico">🧠</span><div class="feat-title">AI Market Analysis</div><div class="feat-body">Google Gemini 1.5 Flash analyzes global crypto markets every hour. Sharp, data-driven insights — no hype, just pure intelligence.</div><span class="feat-tag">GEMINI AI</span></div>
+    <div class="feat-card fade-up"><span class="feat-num">// 02</span><span class="feat-ico">⚡</span><div class="feat-title">Price Alerts</div><div class="feat-body">Instant alerts when any coin moves ≥5% in one hour. Zero Cash Ai monitors 24/7 — never miss a pump or dump again.</div><span class="feat-tag">REAL-TIME</span></div>
+    <div class="feat-card fade-up"><span class="feat-num">// 03</span><span class="feat-ico">📊</span><div class="feat-title">Chart Visualizations</div><div class="feat-body">Auto-generated 24h comparison charts and 7-day sparklines sent with every post. Beautiful visual market data automatically.</div><span class="feat-tag">QUICKCHART</span></div>
+    <div class="feat-card fade-up"><span class="feat-num">// 04</span><span class="feat-ico">❓</span><div class="feat-title">AI Q&A Bot</div><div class="feat-body">Ask the bot anything in plain English. It fetches live data and responds with Gemini AI. Try: "Will ETH break $3k?"</div><span class="feat-tag">INTERACTIVE</span></div>
+    <div class="feat-card fade-up"><span class="feat-num">// 05</span><span class="feat-ico">🔵</span><div class="feat-title">Base Chain Native</div><div class="feat-body">Deployed on Base — Coinbase's Ethereum L2. Agent actions settle on-chain. Fully decentralized and transparent.</div><span class="feat-tag">BASE L2</span></div>
+    <div class="feat-card fade-up"><span class="feat-num">// 06</span><span class="feat-ico">🌍</span><div class="feat-title">Global Coverage</div><div class="feat-body">Tracks BTC, ETH, SOL, SUI, VIRTUAL, BNB + trending coins. Posts to both Telegram channel and group every hour.</div><span class="feat-tag">WORLDWIDE</span></div>
+  </div>
+</section>
+
+<div class="terminal-wrap" id="terminal">
+  <div class="sec-eyebrow" style="padding:0 0 14px">// LIVE OUTPUT SAMPLE</div>
+  <div class="terminal">
+    <div class="term-bar"><div class="td r"></div><div class="td y"></div><div class="td g"></div><span class="term-title">zero-cash-ai@base-mainnet:8453 — agent process</span></div>
+    <div class="term-body">
+      <div class="tl"><span class="tp">agent@base $</span><span class="tc"> zero-cash-ai --chain base --network mainnet --start</span></div>
+      <div class="to tbl">🔵 Connected: Base Mainnet (Chain ID: 8453)</div>
+      <div class="to tg">🤖 Zero Cash Ai v2 initialized — Virtuals Protocol GAME SDK</div>
+      <div class="to">&nbsp;</div>
+      <div class="tl"><span class="tp">agent@base $</span><span class="tc"> gemini --model gemini-1.5-flash --analyze</span></div>
+      <div class="to" style="color:#ffd700">🧠 AI Analysis:</div>
+      <div class="to">"Bullish momentum — BTC +3.61%, VIRTUAL surging +7.67%.</div>
+      <div class="to"> Virtuals/Base ecosystem heating up. Watch $71K resistance."</div>
+      <div class="to">&nbsp;</div>
+      <div class="tl"><span class="tp">agent@base $</span><span class="tc"> telegram --post channel,group && twitter --post</span></div>
+      <div class="to tg">✅ @ZeroCashAi channel — posted with chart</div>
+      <div class="to tg">✅ Group posted successfully</div>
+      <div class="to tg">✅ @Zero_Cash_Ai Twitter — posted</div>
+      <div class="to">&nbsp;</div>
+      <div class="tl"><span class="tp">agent@base $</span><span class="cur"></span></div>
+    </div>
+  </div>
+</div>
+
+<section class="social-section" id="social">
+  <div class="sec-eyebrow">// CONNECT WITH US</div>
+  <h2 class="sec-title" style="margin-bottom:40px">Follow Zero Cash Ai<br><span class="accent-g">everywhere.</span></h2>
+  <div class="social-grid">
+    <a href="https://t.me/ZeroCashAi" class="social-card telegram fade-up" target="_blank">
+      <span class="soc-icon">✈️</span>
+      <div><div class="soc-name">Telegram Channel</div><div class="soc-handle">@ZeroCashAi</div></div>
+    </a>
+    <a href="https://x.com/Zero_Cash_Ai" class="social-card twitter fade-up" target="_blank">
+      <span class="soc-icon">𝕏</span>
+      <div><div class="soc-name">Twitter / X</div><div class="soc-handle">@Zero_Cash_Ai</div></div>
+    </a>
+    <a href="https://github.com/Foisal777/zero-cash-ai" class="social-card github fade-up" target="_blank">
+      <span class="soc-icon">⚡</span>
+      <div><div class="soc-name">GitHub</div><div class="soc-handle">Foisal777/zero-cash-ai</div></div>
+    </a>
+    <a href="https://virtuals.io" class="social-card virtuals fade-up" target="_blank">
+      <span class="soc-icon">🔵</span>
+      <div><div class="soc-name">Virtuals Protocol</div><div class="soc-handle">app.virtuals.io</div></div>
+    </a>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="cta-inner fade-up">
+    <h2>Join Zero Cash Ai.</h2>
+    <p>Free AI-powered crypto intelligence. Real-time analysis, price alerts, and Base Chain AI insights — 24/7, completely free.</p>
+    <div class="cta-btns">
+      <a href="https://t.me/ZeroCashAi" class="btn-primary" target="_blank">📱 Join Telegram</a>
+      <a href="https://x.com/Zero_Cash_Ai" class="btn-twitter" target="_blank">𝕏 Follow on X</a>
+      <a href="https://github.com/Foisal777/zero-cash-ai" class="btn-ghost" target="_blank">⚡ GitHub</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-logo">ZERO CASH AI</div>
+  <div class="foot-chain">🔵 Base Chain × Virtuals Protocol × Google Gemini</div>
+  <div class="foot-links">
+    <a href="https://t.me/ZeroCashAi" target="_blank">Telegram</a>
+    <a href="https://x.com/Zero_Cash_Ai" target="_blank">Twitter</a>
+    <a href="https://github.com/Foisal777/zero-cash-ai" target="_blank">GitHub</a>
+    <a href="https://virtuals.io" target="_blank">Virtuals</a>
+    <a href="https://base.org" target="_blank">Base</a>
+  </div>
+</footer>
+
+<script>
+const canvas=document.getElementById('canvas3d');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(window.innerWidth,window.innerHeight);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,1000);
+camera.position.set(0,0,18);
+scene.add(new THREE.AmbientLight(0x0a0a2e,2));
+const bl=new THREE.PointLight(0x0052ff,3,50);bl.position.set(10,10,5);scene.add(bl);
+const gl=new THREE.PointLight(0x00ff88,2,40);gl.position.set(-10,-5,5);scene.add(gl);
+function makeHex(r,d,col,wire=false){
+  const s=new THREE.Shape();
+  for(let i=0;i<6;i++){const a=(i*Math.PI)/3-Math.PI/6;i===0?s.moveTo(r*Math.cos(a),r*Math.sin(a)):s.lineTo(r*Math.cos(a),r*Math.sin(a))}
+  s.closePath();
+  const g=new THREE.ExtrudeGeometry(s,{depth:d,bevelEnabled:true,bevelSize:.05,bevelThickness:.05});
+  const m=wire?new THREE.MeshBasicMaterial({color:col,wireframe:true,opacity:.15,transparent:true}):new THREE.MeshPhongMaterial({color:col,transparent:true,opacity:.75,shininess:120,emissive:col,emissiveIntensity:.12});
+  return new THREE.Mesh(g,m);
+}
+const mh=makeHex(3.5,.3,0x0052ff);mh.position.set(6,0,-5);mh.rotation.z=.1;scene.add(mh);
+const wh=makeHex(3.6,.1,0x0052ff,true);wh.position.set(6,0,-4.8);wh.rotation.z=.1;scene.add(wh);
+const hps=[[-8,3,-8],[9,-4,-10],[-6,-5,-12],[3,6,-14],[-4,7,-9],[7,5,-11],[-2,-8,-7]];
+const hexes=hps.map((p,i)=>{const sz=.5+Math.random()*1.2;const h=makeHex(sz,.1,i%2===0?0x0052ff:0x00ff88,true);h.position.set(...p);h.rotation.set(Math.random()*6,Math.random()*6,Math.random()*6);scene.add(h);return h});
+const pc=800,pos=new Float32Array(pc*3),col=new Float32Array(pc*3);
+for(let i=0;i<pc;i++){pos[i*3]=(Math.random()-.5)*70;pos[i*3+1]=(Math.random()-.5)*55;pos[i*3+2]=(Math.random()-.5)*35-10;const b=Math.random()>.4;col[i*3]=0;col[i*3+1]=b?.32:1;col[i*3+2]=b?1:.53}
+const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pos,3));pg.setAttribute('color',new THREE.BufferAttribute(col,3));
+const pts=new THREE.Points(pg,new THREE.PointsMaterial({size:.06,vertexColors:true,transparent:true,opacity:.6}));scene.add(pts);
+const rg=new THREE.TorusGeometry(4.2,.03,8,64);const ring=new THREE.Mesh(rg,new THREE.MeshBasicMaterial({color:0x0052ff,transparent:true,opacity:.25}));ring.position.set(6,0,-5);ring.rotation.x=Math.PI*.1;scene.add(ring);
+const rg2=new THREE.TorusGeometry(5,.02,8,64);const ring2=new THREE.Mesh(rg2,new THREE.MeshBasicMaterial({color:0x00ff88,transparent:true,opacity:.12}));ring2.position.set(6,0,-5);ring2.rotation.x=Math.PI*.2;scene.add(ring2);
+let mx=0,my=0;
+document.addEventListener('mousemove',e=>{mx=(e.clientX/window.innerWidth-.5)*2;my=(e.clientY/window.innerHeight-.5)*2});
+window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});
+let t=0;
+function animate(){requestAnimationFrame(animate);t+=.005;
+mh.rotation.y=t*.3;mh.rotation.z=.1+Math.sin(t*.5)*.05;
+wh.rotation.y=-t*.2;ring.rotation.z=t*.4;ring2.rotation.z=-t*.25;
+hexes.forEach((h,i)=>{h.rotation.x+=.005+i*.001;h.rotation.y+=.007+i*.001;h.position.y+=Math.sin(t+i)*.002});
+pts.rotation.y=t*.02;pts.rotation.x=t*.01;
+camera.position.x+=(mx*1.5-camera.position.x)*.03;
+camera.position.y+=(-my*1.0-camera.position.y)*.03;
+camera.lookAt(0,0,0);
+bl.intensity=2+Math.sin(t*2)*.8;
+renderer.render(scene,camera)}
+animate();
+const obs=new IntersectionObserver(els=>els.forEach(el=>{if(el.isIntersecting)el.target.classList.add('show')}),{threshold:.1});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+async function updateTicker(){
+  try{
+    const r=await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,sui,virtual-protocol,bnb&order=market_cap_desc');
+    const d=await r.json();
+    const items=d.map(c=>{const ch=c.price_change_percentage_24h?.toFixed(2);const u=ch>0;return`<span class="tick"><span class="tick-sym">${c.symbol.toUpperCase()}</span><span class="tick-price">$${c.current_price?.toLocaleString()}</span><span class="${u?'up':'dn'}">${u?'+':''}${ch}%</span></span>`}).join('');
+    const extra=`<span class="tick"><span class="tick-sym">BASE</span><span class="tick-price">MAINNET</span><span class="up">LIVE</span></span>`;
+    document.getElementById('ticker').innerHTML=items+extra+items+extra;
+    const tot=d.reduce((s,c)=>s+c.market_cap,0);
+    const f='$'+(tot/1e12).toFixed(2)+'T';
+    document.getElementById('h-mcap').textContent=f;
+    document.getElementById('s-mcap').textContent=f;
+  }catch(e){}
+}
+updateTicker();setInterval(updateTicker,60000);
+</script>
+</body>
+</html>
